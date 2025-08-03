@@ -1,3 +1,14 @@
+# Secret credentials and other text files
+*.txt
+
+# Python virtual environment
+venv/
+
+# Python cache
+__pycache__/
+*.pyc
+
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
