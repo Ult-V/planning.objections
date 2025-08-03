@@ -1,18 +1,29 @@
 import fitz
 import os
 import google.generativeai as genai
-from google.cloud import aiplatform
 import requests
 import json
+from google.cloud import secretmanager
 
 # --- Configuration ---
-GOOGLE_API_KEY = "AIzaSyDm5H5W6p5FkzvzgXG5fyxkx6ni6cNUYF8"
-ACCESS_TOKEN = "PASTE_YOUR_TOKEN_HERE" # The token you just copied
 GCP_PROJECT_ID = "crucial-accord-467816-g0"
-GCP_LOCATION = "europe-west2"
-INDEX_ID = "6651939794928533504" # The ID of the INDEX, not the endpoint
-INDEX_ENDPOINT_ID = "6320925222316802048" # Get this from the GCP Console
+INDEX_ENDPOINT_ID = "YOUR_INDEX_ENDPOINT_ID_HERE"
 PDF_FILENAME = "islington-council-local-plan-strategic-and-development-management-policies.pdf"
+
+
+
+def get_secret(project_id, secret_id, version_id="latest"):
+    """Fetches a secret from Google Cloud Secret Manager."""
+    client = secretmanager.SecretManagerServiceClient()
+    name = f"projects/{project_id}/secrets/{secret_id}/versions/{version_id}"
+    response = client.access_secret_version(request={"name": name})
+    return response.payload.data.decode("UTF-8")
+
+# --- Fetch Secrets at Startup ---
+print("🔐 Fetching secrets from Google Cloud Secret Manager...")
+GOOGLE_API_KEY = get_secret(GCP_PROJECT_ID, "google-api-key")
+ACCESS_TOKEN = get_secret(GCP_PROJECT_ID, "gcp-access-token") # Assumes you created a secret named 'gcp-access-token'
+print("✅ Secrets fetched successfully.")
 
 try:
     script_dir = os.path.dirname(os.path.abspath(__file__))
